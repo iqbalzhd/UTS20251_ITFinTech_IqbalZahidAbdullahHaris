@@ -6,3 +6,11 @@ export interface IProduct {
     imgurl: string;
     quantity: number;
 }
+
+export interface CartProduct {
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+    imgurl: string
+}

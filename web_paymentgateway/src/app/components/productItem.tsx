@@ -1,14 +1,19 @@
+'use client'
 import React, { useState } from "react";
 
 // ProductItem Component
-const ProductItem = ({ name, price }: { name: string; price: number }) => {
+const ProductItem = ({ name, price, imgurl }: { name: string; price: number; imgurl: string }) => {
     const [quantity, setQuantity] = useState(1);
-
+    console.log(imgurl)
     return (
         <div className="flex items-center justify-between border-b py-4">
             {/* Kiri: Gambar + Nama + Quantity */}
             <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-gray-200" />
+                {imgurl ? (
+                    <img src={imgurl} alt={name} className="w-12 h-12 rounded-lg object-cover" />
+                ) : (
+                    <div className="w-12 h-12 rounded-lg bg-gray-200" />
+                )}
                 <div>
                     <h3 className="font-semibold">{name}</h3>
                     <div className="flex items-center gap-2 mt-2">
@@ -30,7 +35,7 @@ const ProductItem = ({ name, price }: { name: string; price: number }) => {
             </div>
 
             <div>
-                <p className="font-semibold">Rp {price}</p>
+                <p className="font-semibold">Rp {price.toLocaleString("id-ID")}</p>
 
             </div>
         </div>
