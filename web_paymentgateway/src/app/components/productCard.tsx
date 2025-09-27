@@ -35,7 +35,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div className="card bg-base-100 w-96 shadow-sm mx-auto">
+    <div className="card bg-base-100 shadow-sm mx-auto w-full">
+
       <figure>
         <img src={image} alt={title} />
       </figure>

@@ -5,10 +5,12 @@ import Link from 'next/link'
 
 const navBar = () => {
     return (
-        <div className="navbar bg-base-100 shadow-sm">
+        < div className="navbar bg-base-100 shadow-sm sticky top-0 z-50" >
+
             <div className="flex-1">
                 <a className="btn btn-ghost text-xl">daisyUI</a>
             </div>
+            <input type="text" placeholder="Search" className="input input-bordered w-24 md:w-auto" />
             <div className="flex-none">
                 <div className="dropdown dropdown-end">
                     <Link href="/checkout">

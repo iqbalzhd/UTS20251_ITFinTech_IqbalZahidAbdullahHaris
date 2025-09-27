@@ -2,6 +2,7 @@ import Navbar from "./components/navBar";
 import { getData } from "../lib/mongo";
 import { IProduct } from "../lib/types";
 import ProductGrid from "./components/productGrid";
+import Footer from "./components/footer";
 
 export default async function Home() {
   const productCollection = await getData<IProduct>("product");
@@ -20,7 +21,11 @@ export default async function Home() {
   return (
     <div>
       <Navbar />
-      <ProductGrid products={cleanProducts} />
+      <div className="mx-10">
+        <ProductGrid products={cleanProducts} />
+      </div>
+      <Footer />
+
     </div>
   );
 }
