@@ -37,7 +37,6 @@ export default function ProductGrid({ products }: ProductGridProps) {
             {products.map((product) => (
                 <ProductCard
                     key={product.id}
-                    id={product.id}
                     title={product.name}
                     price={product.price}
                     image={product.imgurl}

@@ -6,7 +6,7 @@ if (!process.env.DB_URI) {
 }
 
 const client = new MongoClient(process.env.DB_URI);
-const dbName = process.env.DB_NAME || "myDatabase";
+const dbName = process.env.DB_NAME;
 
 // Fungsi ambil DB
 async function getDB(): Promise<Db> {

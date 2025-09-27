@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import ProductItem from "../components/productItem";
-import { IProduct, CartProduct } from "../../lib/types";
+import { CartProduct } from "../../lib/types";
 
 
 
@@ -26,19 +26,23 @@ const CheckoutPage = () => {
     }, []);
 
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const tax = Math.round(subtotal * 0.035); // misal 3.5% pajak
+    const tax = Math.round(subtotal * 0.11); // misal 3.5% pajak
     const total = subtotal + tax;
 
     if (loading)
         return (
-            <div className="flex justify-center items-center h-64">
-                <p className="text-lg font-medium text-gray-600 animate-pulse">
-                    Loading cart...
-                </p>
+            <div className="min-h-screen flex items-center justify-center p-6">
+                <div className="w-full max-w-2xl bg-base-100 shadow-md rounded-lg p-6">
+                    <div className="flex justify-center items-center h-64">
+                        <p className="text-lg font-medium text-gray-600 animate-pulse">
+                            Loading cart...
+                        </p>
+                    </div>
+                </div>
             </div>
         );
 
-    // Kondisi cart kosong
+    // Jika kondisi cart kosong
     const isCartEmpty = cart.length === 0 || cart.every((item) => item.quantity === 0);
 
     return (
@@ -57,7 +61,6 @@ const CheckoutPage = () => {
                             cart.map((item) => (
                                 <ProductItem
                                     key={item.id}
-                                    id={item.id}
                                     name={item.name}
                                     price={item.price}
                                     imgurl={item.imgurl}
@@ -121,16 +124,44 @@ const CheckoutPage = () => {
                             <span>Rp {subtotal.toLocaleString("id-ID")}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span>Pajak</span>
+                            <span>PPN</span>
                             <span>Rp {tax.toLocaleString("id-ID")}</span>
                         </div>
                         <div className="flex justify-between font-bold">
                             <span>Total</span>
                             <span>Rp {total.toLocaleString("id-ID")}</span>
                         </div>
-                        <button className="btn btn-primary w-full mt-4">
+                        <button
+                            className="btn btn-primary w-full mt-4"
+                            onClick={async () => {
+                                try {
+                                    const payload = {
+                                        items: cart.map(i => ({ productId: i.id, name: i.name, qty: i.quantity, price: i.price })),
+                                        subtotal,
+                                        tax,
+                                        total,
+                                    };
+                                    const res = await fetch("/api/order/create", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify(payload),
+                                    });
+                                    const data = await res.json();
+                                    if (data.invoice_url) {
+                                        window.location.href = data.invoice_url; // redirect ke Xendit
+                                    } else {
+                                        alert("Gagal membuat invoice");
+                                        console.error(data);
+                                    }
+                                } catch (err) {
+                                    console.error(err);
+                                    alert("Terjadi error, cek console");
+                                }
+                            }}
+                        >
                             Continue to Payment →
                         </button>
+
                     </div>
                 )}
             </div>

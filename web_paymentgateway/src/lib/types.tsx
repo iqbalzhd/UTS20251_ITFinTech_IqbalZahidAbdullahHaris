@@ -14,3 +14,21 @@ export interface CartProduct {
     quantity: number;
     imgurl: string
 }
+
+export interface ProductCardProps {
+    title: string;
+    price: number;
+    image: string;
+    description: string;
+    onAdd: () => void;
+    onRemove: () => void;
+}
+
+export interface ProductItemProps {
+    name: string;
+    price: number;
+    imgurl: string;
+    quantity: number; // initial dari DB
+    onAdd: () => void;
+    onRemove: () => void;
+}

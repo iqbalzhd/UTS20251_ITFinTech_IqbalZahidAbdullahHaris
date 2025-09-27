@@ -8,7 +8,6 @@ export default async function Home() {
   const productCollection = await getData<IProduct>("product");
   const products = await productCollection.find({}).toArray();
 
-  // Convert MongoDB document jadi plain object
   const cleanProducts: IProduct[] = products.map((p) => ({
     id: p.id,
     name: p.name,

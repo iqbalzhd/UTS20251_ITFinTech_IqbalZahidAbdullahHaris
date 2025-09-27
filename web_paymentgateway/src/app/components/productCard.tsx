@@ -1,18 +1,9 @@
 "use client";
 import React, { useState } from "react";
+import { ProductCardProps } from "@/lib/types";
 
-interface ProductCardProps {
-  id: number;
-  title: string;
-  price: number;
-  image: string;
-  description: string;
-  onAdd: () => void;
-  onRemove: () => void;
-}
 
 const ProductCard: React.FC<ProductCardProps> = ({
-  id,
   title,
   price,
   image,

@@ -1,19 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-
-interface ProductItemProps {
-    id: number;
-    name: string;
-    price: number;
-    imgurl: string;
-    quantity: number; // initial dari DB
-    onAdd: () => void;
-    onRemove: () => void;
-}
+import { ProductItemProps } from "@/lib/types";
 
 const ProductItem: React.FC<ProductItemProps> = ({
-    id,
     name,
     price,
     imgurl,
