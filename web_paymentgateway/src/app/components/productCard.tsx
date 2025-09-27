@@ -1,17 +1,18 @@
-'use client'
-import React, { useState } from 'react'
+"use client";
+import React, { useState } from "react";
 
-// Definisikan tipe props
 interface ProductCardProps {
-  title: string
-  price: number
-  image: string
-  description: string
-  onAdd: () => void
-  onRemove: () => void
+  id: number;
+  title: string;
+  price: number;
+  image: string;
+  description: string;
+  onAdd: () => void;
+  onRemove: () => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
+  id,
   title,
   price,
   image,
@@ -19,19 +20,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onAdd,
   onRemove,
 }) => {
-  const [quantity, setQuantity] = useState<number>(0)
+  const [quantity, setQuantity] = useState<number>(0);
 
   const increment = () => {
-    setQuantity((q) => q + 1)
-    onAdd()
-  }
+    setQuantity((q) => q + 1);
+    onAdd();
+  };
 
   const decrement = () => {
     if (quantity > 0) {
-      setQuantity((q) => q - 1)
-      onRemove()
+      setQuantity((q) => q - 1);
+      onRemove();
     }
-  }
+  };
 
   return (
     <div className="card bg-base-100 w-96 shadow-sm mx-auto">
@@ -40,7 +41,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       </figure>
       <div className="card-body">
         <h2 className="card-title">{title}</h2>
-        <h2>Rp {price.toLocaleString('id-ID')}</h2>
+        <h2>Rp {price.toLocaleString("id-ID")}</h2>
         <p>{description}</p>
 
         <div className="card-actions justify-end">
@@ -68,7 +69,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ProductCard
+export default ProductCard;

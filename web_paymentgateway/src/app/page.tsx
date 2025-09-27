@@ -1,28 +1,26 @@
-'use client'
-import React, { useState } from 'react'
-import Navbar from './components/navBar'
-import ProductCard from './components/productCard'
+import Navbar from "./components/navBar";
+import { getData } from "../lib/mongo";
+import { IProduct } from "../lib/types";
+import ProductGrid from "./components/productGrid";
 
-const Home = () => {
+export default async function Home() {
+  const productCollection = await getData<IProduct>("product");
+  const products = await productCollection.find({}).toArray();
+
+  // Convert MongoDB document jadi plain object
+  const cleanProducts: IProduct[] = products.map((p) => ({
+    id: p.id,
+    name: p.name,
+    desc: p.desc,
+    price: p.price,
+    imgurl: p.imgurl,
+    quantity: p.quantity,
+  }));
 
   return (
     <div>
-      {/* kirim jumlah cart ke Navbar */}
       <Navbar />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-10 mt-8 mx-auto">
-        <ProductCard
-          title="Sepatu Keren"
-          price={200000}
-          image="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
-          description="Sepatu nyaman dipakai untuk sehari-hari."
-          onAdd={() => console.log('Item ditambah')}
-          onRemove={() => console.log('Item dikurangi')}
-        />
-
-      </div>
+      <ProductGrid products={cleanProducts} />
     </div>
-  )
+  );
 }
-
-export default Home
