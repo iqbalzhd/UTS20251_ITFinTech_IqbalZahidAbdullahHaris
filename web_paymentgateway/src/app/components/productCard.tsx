@@ -27,22 +27,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div className="card bg-base-100 shadow-sm mx-auto w-full">
-
-
-      <figure>
+    <div className="card bg-base-100 shadow-lg mx-auto w-full max-w-sm">
+      <figure className="w-full h-48 overflow-hidden">
         <Image
           src={image}
           alt={title}
           width={400}
           height={300}
-          className="rounded-md object-cover" />
+          className="w-full h-full object-cover rounded-t-md"
+        />
       </figure>
 
       <div className="card-body">
         <h2 className="card-title">{title}</h2>
         <h2>Rp {price.toLocaleString("id-ID")}</h2>
-        <p>{description}</p>
+        <p className="line-clamp-2">{description}</p>
 
         <div className="card-actions justify-end">
           {quantity === 0 ? (
@@ -69,6 +68,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
       </div>
     </div>
+
   );
 };
 
