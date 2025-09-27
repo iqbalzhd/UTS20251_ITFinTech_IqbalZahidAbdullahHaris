@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { ProductCardProps } from "@/lib/types";
+import Image from "next/image";
 
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -28,9 +29,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
   return (
     <div className="card bg-base-100 shadow-sm mx-auto w-full">
 
+
       <figure>
-        <img src={image} alt={title} />
+        <Image
+          src={image}
+          alt={title}
+          width={400}
+          height={300}
+          className="rounded-md object-cover" />
       </figure>
+
       <div className="card-body">
         <h2 className="card-title">{title}</h2>
         <h2>Rp {price.toLocaleString("id-ID")}</h2>
