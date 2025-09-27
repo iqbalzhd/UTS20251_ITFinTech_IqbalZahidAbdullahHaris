@@ -27,8 +27,8 @@ export async function POST(req: Request) {
                 external_id,
                 amount: total,
                 description: "Pembayaran order " + external_id,
-                success_redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/success`,
-                failure_redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/failed`
+                success_redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success`,
+                failure_redirect_url: `${process.env.NEXT_PUBLIC_BASE_URL}/failed`
             }),
         });
 
