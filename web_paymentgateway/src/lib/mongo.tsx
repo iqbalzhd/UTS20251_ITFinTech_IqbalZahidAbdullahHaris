@@ -8,13 +8,13 @@ if (!process.env.DB_URI) {
 const client = new MongoClient(process.env.DB_URI);
 const dbName = process.env.DB_NAME;
 
-// Fungsi ambil DB
-async function getDB(): Promise<Db> {
+// ✅ Tambahkan `export` di sini
+export async function getDB(): Promise<Db> {
     await client.connect();
     return client.db(dbName);
 }
 
-// Fungsi ambil Collection
+// ✅ Tetap export yang ini
 export async function getData<T extends Document = Document>(
     collectionName: string
 ): Promise<Collection<T>> {
