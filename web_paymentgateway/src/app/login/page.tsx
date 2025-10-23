@@ -36,8 +36,12 @@ export default function LoginPage() {
             // Redirect berdasarkan role
             router.push(data.redirectTo);
             router.refresh();
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Terjadi kesalahan tidak terduga');
+            }
         } finally {
             setLoading(false);
         }

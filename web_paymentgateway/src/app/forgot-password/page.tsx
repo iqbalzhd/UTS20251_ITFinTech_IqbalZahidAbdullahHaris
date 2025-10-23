@@ -32,8 +32,12 @@ export default function ForgotPasswordPage() {
 
             // Redirect ke halaman verify OTP
             router.push(`/verify-otp?email=${encodeURIComponent(email)}&type=forgot_password`);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Terjadi kesalahan tidak terduga');
+            }
         } finally {
             setLoading(false);
         }

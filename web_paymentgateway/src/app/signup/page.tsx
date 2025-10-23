@@ -57,8 +57,12 @@ export default function SignupPage() {
 
             // Redirect ke halaman verify OTP dengan email
             router.push(`/verify-otp?email=${encodeURIComponent(data.email)}&type=signup`);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Terjadi kesalahan tidak terduga');
+            }
         } finally {
             setLoading(false);
         }
