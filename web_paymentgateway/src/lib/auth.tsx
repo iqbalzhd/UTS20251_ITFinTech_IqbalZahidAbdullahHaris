@@ -33,11 +33,15 @@ export function generateToken(payload: JWTPayload): string {
 export function verifyToken(token: string): JWTPayload | null {
     try {
         return jwt.verify(token, JWT_SECRET) as JWTPayload;
-    } catch (error) {
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            console.error('JWT verification failed:', err.message);
+        } else {
+            console.error('JWT verification failed with unknown error');
+        }
         return null;
     }
 }
-
 // Generate OTP
 export function generateOTP(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();

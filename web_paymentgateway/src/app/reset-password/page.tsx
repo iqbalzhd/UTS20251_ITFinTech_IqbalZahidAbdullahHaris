@@ -1,12 +1,12 @@
 'use client';
 
 import { Suspense } from 'react';
-import VerifyOTPForm from './VerifyOTPForm';
+import ResetPasswordForm from './ResetPasswordForm';
 
-export default function VerifyOTPPage() {
+export default function ResetPasswordPage() {
     return (
         <Suspense fallback={<p className="text-center mt-10">Loading...</p>}>
-            <VerifyOTPForm />
+            <ResetPasswordForm />
         </Suspense>
     );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function ResetPasswordPage() {
+export default function ResetPasswordForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const email = searchParams.get('email') || '';
@@ -26,7 +26,6 @@ export default function ResetPasswordPage() {
         e.preventDefault();
         setError('');
 
-        // Validasi
         if (formData.password !== formData.confirmPassword) {
             setError('Password tidak cocok');
             return;
@@ -42,14 +41,8 @@ export default function ResetPasswordPage() {
         try {
             const response = await fetch('/api/auth/reset-password', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email,
-                    otp,
-                    password: formData.password,
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, otp, password: formData.password }),
             });
 
             const data = await response.json();
@@ -58,10 +51,13 @@ export default function ResetPasswordPage() {
                 throw new Error(data.error || 'Reset password gagal');
             }
 
-            // Redirect ke login
             router.push('/login?reset=success');
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Something went wrong');
+            }
         } finally {
             setLoading(false);
         }
