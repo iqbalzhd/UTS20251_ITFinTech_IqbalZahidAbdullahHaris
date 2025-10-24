@@ -124,7 +124,7 @@ const CheckoutPage = () => {
                                 </p>
                                 <button
                                     className="btn btn-primary"
-                                    onClick={() => window.location.href = "/products"}
+                                    onClick={() => window.location.href = "/"}
                                 >
                                     Belanja Sekarang
                                 </button>
