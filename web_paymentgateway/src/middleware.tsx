@@ -12,7 +12,7 @@ async function verifyToken(token: string) {
         const { payload }: JWTVerifyResult = await jwtVerify(token, encoder.encode(JWT_SECRET));
         return payload; // berisi userId, email, role, dll
     } catch (err) {
-        console.error('Token verification failed:', err);
+        // console.error('Token verification failed:', err);
         return null;
     }
 }
@@ -21,44 +21,44 @@ export async function middleware(request: NextRequest) {
     const token = request.cookies.get('auth_token')?.value;
     const { pathname } = request.nextUrl;
 
-    console.log('=== MIDDLEWARE START ===');
-    console.log('Path:', pathname);
-    console.log('Token exists:', !!token);
-    console.log('Token value:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
+    // console.log('=== MIDDLEWARE START ===');
+    // console.log('Path:', pathname);
+    // console.log('Token exists:', !!token);
+    // console.log('Token value:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
 
     // Daftar protected routes (hanya admin dashboard yang perlu login)
     const isAdminRoute = pathname.startsWith('/admin');
 
-    console.log('Is admin route:', isAdminRoute);
+    // console.log('Is admin route:', isAdminRoute);
 
     // Jika akses admin route tanpa token
     if (isAdminRoute && !token) {
-        console.log('❌ No token on admin route -> redirect to /login');
-        console.log('=== MIDDLEWARE END ===\n');
+        // console.log('❌ No token on admin route -> redirect to /login');
+        // console.log('=== MIDDLEWARE END ===\n');
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
     // Jika ada token, verify (hanya untuk admin routes)
     if (token && isAdminRoute) {
-        console.log('🔍 Verifying token...');
+        // console.log('🔍 Verifying token...');
         const payload = await verifyToken(token);
 
         if (!payload) {
-            console.log('❌ Invalid token -> redirect to /login and delete cookie');
-            console.log('=== MIDDLEWARE END ===\n');
+            // console.log('❌ Invalid token -> redirect to /login and delete cookie');
+            // console.log('=== MIDDLEWARE END ===\n');
             const response = NextResponse.redirect(new URL('/login', request.url));
             response.cookies.delete('auth_token');
             return response;
         }
 
-        console.log('✅ Token valid');
-        console.log('User role:', payload.role);
-        console.log('User email:', payload.email);
+        // // console.log('✅ Token valid');
+        // // console.log('User role:', payload.role);
+        // // console.log('User email:', payload.email);
 
         // Proteksi route admin - hanya admin yang bisa akses
         if (payload.role !== 'admin') {
-            console.log('❌ Non-admin trying to access admin route -> redirect to /');
-            console.log('=== MIDDLEWARE END ===\n');
+            // // console.log('❌ Non-admin trying to access admin route -> redirect to /');
+            // // console.log('=== MIDDLEWARE END ===\n');
             return NextResponse.redirect(new URL('/', request.url));
         }
     }
@@ -67,14 +67,14 @@ export async function middleware(request: NextRequest) {
     if (token && (pathname === '/login' || pathname === '/signup')) {
         const payload = await verifyToken(token);
         if (payload && payload.role === 'admin') {
-            console.log('🔄 Admin already logged in, redirect to /admin/dashboard');
-            console.log('=== MIDDLEWARE END ===\n');
+            // // console.log('🔄 Admin already logged in, redirect to /admin/dashboard');
+            // // console.log('=== MIDDLEWARE END ===\n');
             return NextResponse.redirect(new URL('/admin/dashboard', request.url));
         }
     }
 
-    console.log('✅ Middleware passed -> Continue to page');
-    console.log('=== MIDDLEWARE END ===\n');
+    // // console.log('✅ Middleware passed -> Continue to page');
+    // // console.log('=== MIDDLEWARE END ===\n');
     return NextResponse.next();
 }
 

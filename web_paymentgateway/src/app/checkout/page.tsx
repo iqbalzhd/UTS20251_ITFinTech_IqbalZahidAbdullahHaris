@@ -3,20 +3,23 @@ import React, { useEffect, useState } from "react";
 import ProductItem from "../components/productItem";
 import { CartProduct } from "../../lib/types";
 
-
-
 const CheckoutPage = () => {
     const [cart, setCart] = useState<CartProduct[]>([]);
     const [loading, setLoading] = useState(true);
+    const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
         async function fetchCart() {
             try {
                 const res = await fetch("/api/cart");
+                if (!res.ok) {
+                    throw new Error(`Failed to fetch cart: ${res.status}`);
+                }
                 const data: CartProduct[] = await res.json();
                 setCart(data);
             } catch (err) {
-                console.error(err);
+                console.error("Error fetching cart:", err);
+                alert("Gagal memuat keranjang. Silakan refresh halaman.");
             } finally {
                 setLoading(false);
             }
@@ -26,10 +29,70 @@ const CheckoutPage = () => {
     }, []);
 
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const tax = Math.round(subtotal * 0.11); // misal 3.5% pajak
+    const tax = Math.round(subtotal * 0.11); // PPN 11%
     const total = subtotal + tax;
 
-    if (loading)
+    const handleCheckout = async () => {
+        if (processing) return; // Prevent double-click
+
+        setProcessing(true);
+
+        try {
+            const payload = {
+                items: cart.map(i => ({
+                    productId: i.id,
+                    name: i.name,
+                    qty: i.quantity,
+                    price: i.price
+                })),
+                subtotal,
+                tax,
+                total,
+            };
+
+            console.log("Sending checkout payload:", payload);
+
+            const res = await fetch("/api/order/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json();
+            console.log("Checkout response:", data);
+
+            if (!res.ok) {
+                // Handle specific error cases
+                if (res.status === 401) {
+                    alert("Anda belum login. Silakan login terlebih dahulu.");
+                    window.location.href = "/login"; // Redirect ke halaman login
+                    return;
+                }
+                throw new Error(data.error || "Gagal membuat order");
+            }
+
+            if (data.invoice_url) {
+                // Tampilkan info jika WhatsApp tidak terkirim
+                if (data.order?.has_phone === false) {
+                    alert("Order berhasil dibuat! Namun nomor WhatsApp tidak terdaftar. Silakan tambahkan nomor WhatsApp di profil Anda.");
+                } else if (data.order?.whatsapp_sent === false) {
+                    alert("Order berhasil dibuat! Namun notifikasi WhatsApp gagal dikirim. Link pembayaran akan tetap dibuka.");
+                }
+
+                // Redirect ke Xendit payment page
+                window.location.href = data.invoice_url;
+            } else {
+                throw new Error("Invoice URL tidak ditemukan");
+            }
+        } catch (err) {
+            console.error("Checkout error:", err);
+            alert(err instanceof Error ? err.message : "Terjadi kesalahan saat checkout. Silakan coba lagi.");
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center p-6">
                 <div className="w-full max-w-2xl bg-base-100 shadow-md rounded-lg p-6">
@@ -41,6 +104,7 @@ const CheckoutPage = () => {
                 </div>
             </div>
         );
+    }
 
     // Jika kondisi cart kosong
     const isCartEmpty = cart.length === 0 || cart.every((item) => item.quantity === 0);
@@ -54,9 +118,17 @@ const CheckoutPage = () => {
                 <div className="card bg-base-100 shadow-md mb-4">
                     <div className="card-body space-y-4">
                         {isCartEmpty ? (
-                            <p className="text-center text-gray-500">
-                                Tidak ada barang dalam keranjang
-                            </p>
+                            <div className="text-center py-8">
+                                <p className="text-gray-500 mb-4">
+                                    Tidak ada barang dalam keranjang
+                                </p>
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => window.location.href = "/products"}
+                                >
+                                    Belanja Sekarang
+                                </button>
+                            </div>
                         ) : (
                             cart.map((item) => (
                                 <ProductItem
@@ -73,24 +145,32 @@ const CheckoutPage = () => {
                                                     : p
                                             )
                                         );
-                                        await fetch("/api/cart", {
-                                            method: "PUT",
-                                            headers: { "Content-Type": "application/json" },
-                                            body: JSON.stringify({
-                                                productId: item.id,
-                                                quantity: item.quantity + 1,
-                                            }),
-                                        });
+                                        try {
+                                            await fetch("/api/cart", {
+                                                method: "PUT",
+                                                headers: { "Content-Type": "application/json" },
+                                                body: JSON.stringify({
+                                                    productId: item.id,
+                                                    quantity: item.quantity + 1,
+                                                }),
+                                            });
+                                        } catch (err) {
+                                            console.error("Error updating cart:", err);
+                                        }
                                     }}
                                     onRemove={async () => {
                                         if (item.quantity <= 1) {
                                             // hapus item dari cart
                                             setCart((prev) => prev.filter((p) => p.id !== item.id));
-                                            await fetch("/api/cart", {
-                                                method: "DELETE",
-                                                headers: { "Content-Type": "application/json" },
-                                                body: JSON.stringify({ productId: item.id }),
-                                            });
+                                            try {
+                                                await fetch("/api/cart", {
+                                                    method: "DELETE",
+                                                    headers: { "Content-Type": "application/json" },
+                                                    body: JSON.stringify({ productId: item.id }),
+                                                });
+                                            } catch (err) {
+                                                console.error("Error removing from cart:", err);
+                                            }
                                         } else {
                                             // kurangi qty
                                             setCart((prev) =>
@@ -100,14 +180,18 @@ const CheckoutPage = () => {
                                                         : p
                                                 )
                                             );
-                                            await fetch("/api/cart", {
-                                                method: "PUT",
-                                                headers: { "Content-Type": "application/json" },
-                                                body: JSON.stringify({
-                                                    productId: item.id,
-                                                    quantity: item.quantity - 1,
-                                                }),
-                                            });
+                                            try {
+                                                await fetch("/api/cart", {
+                                                    method: "PUT",
+                                                    headers: { "Content-Type": "application/json" },
+                                                    body: JSON.stringify({
+                                                        productId: item.id,
+                                                        quantity: item.quantity - 1,
+                                                    }),
+                                                });
+                                            } catch (err) {
+                                                console.error("Error updating cart:", err);
+                                            }
                                         }
                                     }}
                                 />
@@ -124,44 +208,20 @@ const CheckoutPage = () => {
                             <span>Rp {subtotal.toLocaleString("id-ID")}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span>PPN</span>
+                            <span>PPN (11%)</span>
                             <span>Rp {tax.toLocaleString("id-ID")}</span>
                         </div>
-                        <div className="flex justify-between font-bold">
+                        <div className="flex justify-between font-bold text-lg">
                             <span>Total</span>
                             <span>Rp {total.toLocaleString("id-ID")}</span>
                         </div>
                         <button
-                            className="btn btn-primary w-full mt-4"
-                            onClick={async () => {
-                                try {
-                                    const payload = {
-                                        items: cart.map(i => ({ productId: i.id, name: i.name, qty: i.quantity, price: i.price })),
-                                        subtotal,
-                                        tax,
-                                        total,
-                                    };
-                                    const res = await fetch("/api/order/create", {
-                                        method: "POST",
-                                        headers: { "Content-Type": "application/json" },
-                                        body: JSON.stringify(payload),
-                                    });
-                                    const data = await res.json();
-                                    if (data.invoice_url) {
-                                        window.location.href = data.invoice_url; // redirect ke Xendit
-                                    } else {
-                                        alert("Gagal membuat invoice");
-                                        console.error(data);
-                                    }
-                                } catch (err) {
-                                    console.error(err);
-                                    alert("Terjadi error, cek console");
-                                }
-                            }}
+                            className={`btn btn-primary w-full mt-4 ${processing ? 'loading' : ''}`}
+                            onClick={handleCheckout}
+                            disabled={processing}
                         >
-                            Continue to Payment →
+                            {processing ? 'Processing...' : 'Continue to Payment →'}
                         </button>
-
                     </div>
                 )}
             </div>
