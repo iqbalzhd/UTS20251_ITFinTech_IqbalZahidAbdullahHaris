@@ -1,16 +1,46 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 const NavBar = () => {
     const router = useRouter();
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [userRole, setUserRole] = useState<string | null>(null);
+
+    // Cek status login saat component mount
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const res = await fetch('/api/user/profile');
+                if (res.ok) {
+                    const data = await res.json();
+                    setIsLoggedIn(true);
+                    setUserRole(data.user.role);
+                } else {
+                    setIsLoggedIn(false);
+                    setUserRole(null);
+                }
+            } catch (err) {
+                console.error('Auth check failed:', err);
+                setIsLoggedIn(false);
+                setUserRole(null);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        checkAuth();
+    }, []);
 
     const handleLogout = async () => {
         try {
             const res = await fetch('/api/auth/logout', { method: 'POST' });
             if (res.ok) {
+                setIsLoggedIn(false);
+                setUserRole(null);
                 router.push('/login');
             }
         } catch (err) {
@@ -18,13 +48,27 @@ const NavBar = () => {
         }
     }
 
+    const handleLogin = () => {
+        router.push('/login');
+    }
+
     return (
         <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50">
             <div className="flex-1">
-                <a className="btn btn-ghost text-xl">ZZZ Store</a>
+                <Link href="/" className="btn btn-ghost text-xl">
+                    ZZZ Store
+                </Link>
             </div>
 
-            <div className="flex-none">
+            <div className="flex-none gap-2">
+                {/* Admin Dashboard Link - hanya tampil jika user adalah admin */}
+                {!isLoading && isLoggedIn && userRole === 'admin' && (
+                    <Link href="/admin/dashboard" className="btn btn-ghost text-md">
+                        Dashboard
+                    </Link>
+                )}
+
+                {/* Cart Icon */}
                 <div className="dropdown dropdown-end">
                     <Link href="/checkout">
                         <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
@@ -51,12 +95,19 @@ const NavBar = () => {
                         </div>
                     </Link>
                 </div>
-            </div>
 
-            <div className="flex-none">
-                <button onClick={handleLogout} className="btn btn-ghost text-md">
-                    Logout
-                </button>
+                {/* Login/Logout Button */}
+                {!isLoading && (
+                    isLoggedIn ? (
+                        <button onClick={handleLogout} className="btn btn-ghost text-md">
+                            Logout
+                        </button>
+                    ) : (
+                        <button onClick={handleLogin} className="btn btn-ghost text-md">
+                            Login
+                        </button>
+                    )
+                )}
             </div>
         </div>
     )

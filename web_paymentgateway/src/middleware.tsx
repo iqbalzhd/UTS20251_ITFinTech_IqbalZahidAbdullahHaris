@@ -26,21 +26,20 @@ export async function middleware(request: NextRequest) {
     console.log('Token exists:', !!token);
     console.log('Token value:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
 
-    // Daftar public routes
-    const publicRoutes = ['/login', '/signup', '/forgot-password', '/verify-otp'];
-    const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+    // Daftar protected routes (hanya admin dashboard yang perlu login)
+    const isAdminRoute = pathname.startsWith('/admin');
 
-    console.log('Is public route:', isPublicRoute);
+    console.log('Is admin route:', isAdminRoute);
 
-    // Jika tidak ada token dan bukan public route
-    if (!token && !isPublicRoute) {
-        console.log('❌ No token -> redirect to /login');
+    // Jika akses admin route tanpa token
+    if (isAdminRoute && !token) {
+        console.log('❌ No token on admin route -> redirect to /login');
         console.log('=== MIDDLEWARE END ===\n');
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    // Jika ada token, verify
-    if (token) {
+    // Jika ada token, verify (hanya untuk admin routes)
+    if (token && isAdminRoute) {
         console.log('🔍 Verifying token...');
         const payload = await verifyToken(token);
 
@@ -56,19 +55,21 @@ export async function middleware(request: NextRequest) {
         console.log('User role:', payload.role);
         console.log('User email:', payload.email);
 
-        // Redirect user yang sudah login jika akses login/signup
-        if ((pathname === '/login' || pathname === '/signup')) {
-            const redirectUrl = payload.role === 'admin' ? '/admin/dashboard' : '/';
-            console.log('🔄 Already logged in, redirect to', redirectUrl);
-            console.log('=== MIDDLEWARE END ===\n');
-            return NextResponse.redirect(new URL(redirectUrl, request.url));
-        }
-
-        // Proteksi route admin
-        if (pathname.startsWith('/admin') && payload.role !== 'admin') {
+        // Proteksi route admin - hanya admin yang bisa akses
+        if (payload.role !== 'admin') {
             console.log('❌ Non-admin trying to access admin route -> redirect to /');
             console.log('=== MIDDLEWARE END ===\n');
             return NextResponse.redirect(new URL('/', request.url));
+        }
+    }
+
+    // Redirect user yang sudah login sebagai admin jika akses login/signup
+    if (token && (pathname === '/login' || pathname === '/signup')) {
+        const payload = await verifyToken(token);
+        if (payload && payload.role === 'admin') {
+            console.log('🔄 Admin already logged in, redirect to /admin/dashboard');
+            console.log('=== MIDDLEWARE END ===\n');
+            return NextResponse.redirect(new URL('/admin/dashboard', request.url));
         }
     }
 
