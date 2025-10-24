@@ -8,25 +8,20 @@ const NavBar = () => {
     const router = useRouter();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [userRole, setUserRole] = useState<string | null>(null);
 
     // Cek status login saat component mount
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const res = await fetch('/api/user/profile');
+                const res = await fetch('/api/auth/verify');
                 if (res.ok) {
-                    const data = await res.json();
                     setIsLoggedIn(true);
-                    setUserRole(data.user.role);
                 } else {
                     setIsLoggedIn(false);
-                    setUserRole(null);
                 }
             } catch (err) {
                 console.error('Auth check failed:', err);
                 setIsLoggedIn(false);
-                setUserRole(null);
             } finally {
                 setIsLoading(false);
             }
@@ -40,7 +35,6 @@ const NavBar = () => {
             const res = await fetch('/api/auth/logout', { method: 'POST' });
             if (res.ok) {
                 setIsLoggedIn(false);
-                setUserRole(null);
                 router.push('/login');
             }
         } catch (err) {
@@ -55,20 +49,10 @@ const NavBar = () => {
     return (
         <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50">
             <div className="flex-1">
-                <Link href="/" className="btn btn-ghost text-xl">
-                    ZZZ Store
-                </Link>
+                <a className="btn btn-ghost text-xl">ZZZ Store</a>
             </div>
 
-            <div className="flex-none gap-2">
-                {/* Admin Dashboard Link - hanya tampil jika user adalah admin */}
-                {!isLoading && isLoggedIn && userRole === 'admin' && (
-                    <Link href="/admin/dashboard" className="btn btn-ghost text-md">
-                        Dashboard
-                    </Link>
-                )}
-
-                {/* Cart Icon */}
+            <div className="flex-none">
                 <div className="dropdown dropdown-end">
                     <Link href="/checkout">
                         <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
@@ -95,8 +79,38 @@ const NavBar = () => {
                         </div>
                     </Link>
                 </div>
+            </div>
 
-                {/* Login/Logout Button */}
+
+            <div className="flex-none">
+                <div className="dropdown dropdown-end">
+                    <Link href="/admin/dashboard">
+                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
+                            <div className="indicator">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="lucide lucide-user-star-icon lucide-user-star"
+                                >
+                                    <path d="M16.051 12.616a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z" />
+                                    <path d="M8 15H7a4 4 0 0 0-4 4v2" />
+                                    <circle cx="10" cy="7" r="4" />
+                                </svg>
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+            </div>
+
+
+            <div className="flex-none">
                 {!isLoading && (
                     isLoggedIn ? (
                         <button onClick={handleLogout} className="btn btn-ghost text-md">
