@@ -49,7 +49,10 @@ const NavBar = () => {
     return (
         <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50">
             <div className="flex-1">
-                <a className="btn btn-ghost text-xl">ZZZ Store</a>
+                <Link href="/">
+                    <div className="btn btn-ghost text-xl">ZZZ Store</div>
+                </Link>
+
             </div>
 
             <div className="flex-none">
