@@ -5,10 +5,13 @@ import { getData } from '@/lib/mongo'
 // PUT - Update product
 export async function PUT(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const productId = parseInt(params.id)
+        // Await params terlebih dahulu
+        const { id } = await params
+        const productId = parseInt(id)
+
         const body = await req.json()
         const { name, desc, price, imgurl, quantity } = body
 
@@ -59,10 +62,12 @@ export async function PUT(
 // DELETE - Delete product
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const productId = parseInt(params.id)
+        // Await params terlebih dahulu
+        const { id } = await params
+        const productId = parseInt(id)
 
         const productsCollection = await getData('product')
 
