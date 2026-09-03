@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Roboto, Roboto_Mono } from "next/font/google";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 import "./globals.css";
 
@@ -29,6 +30,7 @@ export default function RootLayout({
         className={`${robotoSans.variable} ${robotoMono.variable} antialiased`}
       >
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
